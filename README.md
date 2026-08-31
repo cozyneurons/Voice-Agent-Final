@@ -130,6 +130,20 @@ Get started quickly with our pre-built frontend starter apps, or add telephony s
 
 For advanced customization, see the [complete frontend guide](https://docs.livekit.io/frontends/).
 
+## Placing an Outbound SIP Call
+
+To have your deployed agent make an outbound phone call to a regular phone number using your configured SIP trunk, run the following two commands:
+
+```bash
+# 1. Dispatch the agent to a new room
+lk dispatch create --room <UNIQUE_ROOM_NAME> --agent-name Voice-Agent-Final
+
+# 2. Instruct LiveKit to dial the number and join that same room
+lk sip participant create --room <UNIQUE_ROOM_NAME> --trunk <YOUR_TRUNK_ID> --call <PHONE_NUMBER> --wait
+```
+
+*(Note: Replace `<UNIQUE_ROOM_NAME>` with a unique string for each call, `<YOUR_TRUNK_ID>` with your LiveKit Outbound Trunk ID, and `<PHONE_NUMBER>` with the destination number in E.164 format, e.g. `+918088748400`)*
+
 ## Tests and evals
 
 This project includes a complete suite of evals, based on the LiveKit Agents [testing & evaluation framework](https://docs.livekit.io/agents/start/testing/). To run them, use `pytest`.
