@@ -122,7 +122,7 @@ async def my_agent(ctx: JobContext):
         # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
         # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
         tts=inference.TTS(
-            model="cartesia/sonic-3.5", voice="76961778-5ce4-4aa9-9cdf-66a029d61a8f"
+            model="cartesia/sonic-3.6-2026-08-27", voice="76961778-5ce4-4aa9-9cdf-66a029d61a8f"
         ),
         turn_handling=TurnHandlingOptions(
             # The LiveKit turn detector determines when the user is done speaking and the agent should respond.
@@ -145,14 +145,17 @@ async def my_agent(ctx: JobContext):
         expressive=True,
     )
 
-    # Connect to the room FIRST so remote participants are visible
+    # Connect to the room FIRST
     await ctx.connect()
+
+    # Wait for the actual participant to join the room before proceeding.
+    # Since we dispatch the agent BEFORE dialing, the agent arrives first.
+    # We must wait for the caller to arrive, otherwise is_sip_call evaluates to False.
+    participant = await ctx.wait_for_participant()
 
     # Now we can correctly detect if this is a SIP/phone call
     # SIP participants have identity starting with "sip_"
-    is_sip_call = any(
-        p.identity.startswith("sip_") for p in ctx.room.remote_participants.values()
-    )
+    is_sip_call = participant.identity.startswith("sip_")
 
     # Start the session, which initializes the voice pipeline and warms up the models
     # Noise cancellation is disabled for SIP/phone calls — it's incompatible
@@ -173,8 +176,8 @@ async def my_agent(ctx: JobContext):
 
     # Greet the user — important for phone calls where the caller expects
     # someone to speak first after they pick up
-    if is_sip_call:
-        await session.say("Hello! I'm your AI assistant. How can I help you today?", allow_interruptions=True)
+    await session.say("Hello! I'm your AI assistant. How can I help you today?", allow_interruptions=True)
+
 
 
 if __name__ == "__main__":
