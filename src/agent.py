@@ -116,6 +116,8 @@ async def my_agent(ctx: JobContext):
 
     # Set up a voice AI pipeline using AssemblyAI, Fish Audio, and the LiveKit turn detector
     session = AgentSession(
+        # Use a faster LLM for much quicker response times
+        llm=inference.LLM(model="openai/gpt-4o-mini"),
         # Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
         # See all available models at https://docs.livekit.io/agents/models/stt/
         stt=sarvam.STT(
@@ -143,7 +145,7 @@ async def my_agent(ctx: JobContext):
             interruption={"mode": "vad"},
             # allow the LLM to generate a response while waiting for the end of turn
             # See more at https://docs.livekit.io/agents/build/audio/#preemptive-generation
-            preemptive_generation={"enabled": True},
+            preemptive_generation={"enabled": True, "preemptive_tts": True},
             # Lower the endpointing delay so the agent responds sooner after silence detection
             endpointing={"min_delay": 0.2},
         ),
