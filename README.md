@@ -219,3 +219,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Pipeline**
 - **AVG LLM TTFT**: 1,076ms
 - **AVG TTS TTFB**: 60ms
+
+## Latency Optimizations Implemented
+
+During the development of this agent, several key optimizations were made to the default template to dramatically reduce end-to-end latency and improve responsiveness:
+
+1. **Faster LLM Selection**: Switched the primary LLM to `openai/gpt-4o-mini` (from Gemini), which significantly reduced Time-To-First-Token (TTFT). (Note: `google/gemma-4-31b-it` is also heavily recommended for optimal LiveKit TTFT).
+2. **Preemptive Generation**: Enabled `preemptive_generation` and `preemptive_tts` in `TurnHandlingOptions`. This allows the LLM and TTS pipeline to begin processing *before* the user's turn is fully confirmed by the end-of-turn detector, hiding generation time behind the final moments of user speech.
+3. **Optimized Endpointing Delay**: Reduced `endpointing.min_delay` to `0.07` seconds. Since the Sarvam STT model handles VAD internally and already introduces ~70ms of latency, this tightens the silence threshold required to trigger a response.
+4. **VAD Interruption Mode**: Switched `interruption.mode` from `"adaptive"` to `"vad"`. This ensures the agent stops speaking immediately upon detecting *any* user audio (bypassing the backchannel model), creating a snappier interruption experience.
+5. **Model Prewarming**: Added a `prewarm` setup function to the `AgentServer` to initialize and download the `inference.TurnDetector` weights at process startup. This completely eliminates the cold-start penalty for the very first caller on a new worker.
