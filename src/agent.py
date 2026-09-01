@@ -138,9 +138,9 @@ async def my_agent(ctx: JobContext):
             # AgentSession supplies the required VAD automatically.
             # See more at https://docs.livekit.io/agents/build/turns
             turn_detection=inference.TurnDetector(),
-            # Adaptive interruptions use the turn detector to tell a real interruption from a
-            # backchannel like "mhm" or "right", so the agent keeps talking through the latter.
-            interruption={"mode": "always"},
+            # Use 'vad' mode so the agent stops ANY TIME you speak.
+            # This turns off 'adaptive' mode which tries (and sometimes fails) to guess if you're just saying "mhm".
+            interruption={"mode": "vad"},
             # allow the LLM to generate a response while waiting for the end of turn
             # See more at https://docs.livekit.io/agents/build/audio/#preemptive-generation
             preemptive_generation={"enabled": True},
