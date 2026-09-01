@@ -25,7 +25,7 @@ class Assistant(Agent):
         super().__init__(
             # A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
             # See all available models at https://docs.livekit.io/agents/models/llm/
-            llm=inference.LLM(model="google/gemini-3.5-flash-lite"),
+            llm=inference.LLM(model="openai/gpt-4o-mini"),
             # To use a realtime model instead of a voice pipeline, replace the LLM
             # with a RealtimeModel and remove the STT/TTS from the AgentSession
             # (Note: This is for the OpenAI Realtime API. For other providers, see https://docs.livekit.io/agents/models/realtime/)
@@ -121,7 +121,7 @@ async def my_agent(ctx: JobContext):
         # Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
         # See all available models at https://docs.livekit.io/agents/models/stt/
         stt=sarvam.STT(
-            language="en-IN",
+            language="unknown",
             model="saaras:v3",
             mode="transcribe",
             sample_rate=16000,
@@ -147,12 +147,13 @@ async def my_agent(ctx: JobContext):
             # See more at https://docs.livekit.io/agents/build/audio/#preemptive-generation
             preemptive_generation={"enabled": True, "preemptive_tts": True},
             # Lower the endpointing delay so the agent responds sooner after silence detection
-            endpointing={"min_delay": 0.2},
+            # Sarvam STT adds ~70ms on its own, so we set this to 0.07 to minimize latency
+            endpointing={"min_delay": 0.07},
         ),
         # Expressive mode injects the TTS provider's markup guide into the LLM prompt, so the model
         # emits inline delivery tags (emotion, pacing, non-verbal sounds) that the TTS renders and
-        # the transcript never shows. Requires a TTS model that supports markup, such as the Fish
-        # Audio model above.
+        # the transcript never shows. Requires a TTS model that supports markup, such as the Cartesia
+        # Sonic model above.
         expressive=True,
     )
 
