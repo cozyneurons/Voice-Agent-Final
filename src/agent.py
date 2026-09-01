@@ -144,6 +144,8 @@ async def my_agent(ctx: JobContext):
             # allow the LLM to generate a response while waiting for the end of turn
             # See more at https://docs.livekit.io/agents/build/audio/#preemptive-generation
             preemptive_generation={"enabled": True},
+            # Lower the endpointing delay so the agent responds sooner after silence detection
+            endpointing={"min_delay": 0.2},
         ),
         # Expressive mode injects the TTS provider's markup guide into the LLM prompt, so the model
         # emits inline delivery tags (emotion, pacing, non-verbal sounds) that the TTS renders and
