@@ -20,6 +20,21 @@ logger = logging.getLogger("agent")
 load_dotenv(".env.local")
 
 
+def prewarm(proc: JobProcess) -> None:
+    """Called once at process startup to pre-load models.
+
+    Without this, the first call on every worker process pays a cold-start
+    penalty while the turn-detector weights are downloaded and loaded into
+    memory. With prewarm, the weights are resident before any call arrives.
+    AgentSession bundles Silero VAD internally, so no explicit VAD prewarm
+    is needed.
+    """
+    # Download + cache the LiveKit turn-detector weights once at startup.
+    # Subsequent calls reuse the cached model with zero load time.
+    inference.TurnDetector()
+    logger.info("prewarm: turn detector loaded")
+
+
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(
@@ -36,13 +51,13 @@ class Assistant(Agent):
             #     llm=openai.realtime.RealtimeModel(voice="marin")
             instructions=textwrap.dedent(
                 """\
-                You are a charismatic, conversational sales agent pitching e-commerce website development services. 
+                You are a charismatic, conversational sales agent pitching e-commerce website development services.
                 Speak naturally like a real person, not like a recorded message or a corporate robot.
                 You are capable of understanding and speaking in English, Hindi, and Telugu. Always respond in the same language the user speaks to you.
 
                 # Your Goal
 
-                Your objective is to sell our e-commerce website development service. 
+                Your objective is to sell our e-commerce website development service.
                 Naturally guide the conversation to ask the right qualifying questions:
                 1. What is their budget?
                 2. What products do they sell?
@@ -104,6 +119,7 @@ class Assistant(Agent):
 
 
 server = AgentServer()
+server.setup_fnc = prewarm
 
 
 @server.rtc_session(agent_name="Voice-Agent-Final")
@@ -131,7 +147,8 @@ async def my_agent(ctx: JobContext):
         # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
         # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
         tts=inference.TTS(
-            model="cartesia/sonic-3.6-2026-08-27", voice="76961778-5ce4-4aa9-9cdf-66a029d61a8f"
+            model="cartesia/sonic-3.6-2026-08-27",
+            voice="76961778-5ce4-4aa9-9cdf-66a029d61a8f",
         ),
         turn_handling=TurnHandlingOptions(
             # The LiveKit turn detector determines when the user is done speaking and the agent should respond.
@@ -173,9 +190,9 @@ async def my_agent(ctx: JobContext):
     # Noise cancellation is disabled for SIP/phone calls — it's incompatible
     # with SIP audio codecs (G.711 at 8kHz) and will silently break the pipeline
     audio_input_opts = room_io.AudioInputOptions(
-        noise_cancellation=None if is_sip_call else ai_coustics.audio_enhancement(
-            model=ai_coustics.EnhancerModel.QUAIL_VF_S
-        ),
+        noise_cancellation=None
+        if is_sip_call
+        else ai_coustics.audio_enhancement(model=ai_coustics.EnhancerModel.QUAIL_VF_S),
     )
 
     await session.start(
@@ -188,8 +205,10 @@ async def my_agent(ctx: JobContext):
 
     # Greet the user — important for phone calls where the caller expects
     # someone to speak first after they pick up
-    await session.say("Hello! I'm your AI assistant. How can I help you today?", allow_interruptions=True)
-
+    await session.say(
+        "Hello! I'm your AI assistant. How can I help you today?",
+        allow_interruptions=True,
+    )
 
 
 if __name__ == "__main__":
