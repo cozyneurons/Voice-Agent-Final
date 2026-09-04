@@ -7,7 +7,6 @@ from livekit.agents import (
     AgentServer,
     AgentSession,
     JobContext,
-    JobProcess,
     TurnHandlingOptions,
     cli,
     inference,

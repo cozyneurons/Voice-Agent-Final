@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Razorpay Dark Mode Theme Palette */
+  --rzp-bg-deep: #050811;
+  --rzp-bg-surface: #0a101d;
+  --rzp-bg-card: #0d1527;
+  --rzp-bg-card-hover: #111b33;
+  --rzp-bg-elevated: #152244;
+  
+  --rzp-blue-primary: #3395ff;
+  --rzp-blue-hover: #1e85ff;
+  --rzp-blue-dark: #0c2340;
+  --rzp-blue-glow: rgba(51, 149, 255, 0.35);
+  
+  --rzp-emerald: #00d09c;
+  --rzp-emerald-glow: rgba(0, 208, 156, 0.3);
+  
+  --rzp-border: rgba(51, 149, 255, 0.12);
+  --rzp-border-hover: rgba(51, 149, 255, 0.3);
+  --rzp-border-active: #3395ff;
+  
+  --rzp-text-primary: #f8fafc;
+  --rzp-text-secondary: #94a3b8;
+  --rzp-text-muted: #64748b;
+}
+
+/* Root settings */
+html, body {
+  min-height: 100vh;
+}
+
+body {
+  background-color: var(--rzp-bg-deep);
+  color: var(--rzp-text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(51, 149, 255, 0.14) 0%, transparent 60%),
+    radial-gradient(circle at 80% 40%, rgba(12, 35, 64, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 20% 70%, rgba(0, 208, 156, 0.05) 0%, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--rzp-bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(51, 149, 255, 0.2), inset 0 0 15px rgba(51, 149, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(51, 149, 255, 0.4), inset 0 0 25px rgba(51, 149, 255, 0.2);
+  }
+}
+
+@keyframes pingDot {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes soundWave {
+  0%, 100% {
+    height: 6px;
+  }
+  50% {
+    height: 28px;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+.wave-bar {
+  display: inline-block;
+  width: 4px;
+  background: #3395ff;
+  border-radius: 2px;
+  animation: soundWave 1.2s infinite ease-in-out;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { animation-delay: 0.2s; }
+.wave-bar:nth-child(6) { animation-delay: 0.35s; }
+
+/* Grid Pattern Background */
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}

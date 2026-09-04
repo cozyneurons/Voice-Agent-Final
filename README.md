@@ -128,7 +128,41 @@ Get started quickly with our pre-built frontend starter apps, or add telephony s
 | **Web Embed** | [`livekit-examples/agent-starter-embed`](https://github.com/livekit-examples/agent-starter-embed) | Voice AI widget for any website |
 | **Telephony** | [Documentation](https://docs.livekit.io/telephony/) | Add inbound or outbound calling to your agent |
 
-For advanced customization, see the [complete frontend guide](https://docs.livekit.io/frontends/).
+
+## Razorpay-Themed Web App (Vercel Deployment)
+
+This project includes a custom fullstack React / Next.js web application located in [`web/`](web/) featuring a **Razorpay-themed dark mode UI**.
+
+Visitors to the website can:
+- **📱 Place a Phone Call to their number**: Triggers an outbound SIP call using your LiveKit SIP trunk (Vobiz India `+91` or Plivo Global `+1`), connecting their mobile device directly to `Voice-Agent-Final`.
+- **🎙️ Talk in Browser**: Connects directly via WebRTC microphone for instant testing without phone charges.
+
+### Running the Web App Locally
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000).
+
+### Deploying to Vercel
+
+```bash
+cd web
+npx vercel
+```
+
+In the Vercel project environment variables, add:
+- `LIVEKIT_URL`
+- `LIVEKIT_API_KEY`
+- `LIVEKIT_API_SECRET`
+- `SIP_OUTBOUND_TRUNK_ID_IN` (`ST_BGnxxGYCdiay`)
+- `SIP_OUTBOUND_TRUNK_ID_GLOBAL` (`ST_ChjCVACKwo8T`)
+- `LIVEKIT_AGENT_NAME` (`Voice-Agent-Final`)
+
+---
 
 ## Placing an Outbound SIP Call
 
