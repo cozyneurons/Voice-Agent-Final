@@ -242,7 +242,7 @@ export default function PhoneDialer() {
                 >
                   {COUNTRIES.map((c, i) => (
                     <option key={`${c.code}-${i}`} value={c.code} className="bg-[#0d1527] text-white">
-                      {c.flag} {c.code} ({c.name})
+                      {c.flag} {c.code}
                     </option>
                   ))}
                 </select>

@@ -9,8 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@livekit/components-react": "^2.9.24",
     "canvas-confetti": "^1.9.4",
+    "gsap": "^3.15.0",
     "livekit-client": "^2.22.2",
     "livekit-server-sdk": "^2.18.0",
     "lucide-react": "^1.41.0",
