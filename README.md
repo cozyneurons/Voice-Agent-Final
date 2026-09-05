@@ -263,3 +263,21 @@ During the development of this agent, several key optimizations were made to the
 3. **Optimized Endpointing Delay**: Reduced `endpointing.min_delay` to `0.07` seconds. Since the Sarvam STT model handles VAD internally and already introduces ~70ms of latency, this tightens the silence threshold required to trigger a response.
 4. **VAD Interruption Mode**: Switched `interruption.mode` from `"adaptive"` to `"vad"`. This ensures the agent stops speaking immediately upon detecting *any* user audio (bypassing the backchannel model), creating a snappier interruption experience.
 5. **Model Prewarming**: Added a `prewarm` setup function to the `AgentServer` to initialize and download the `inference.TurnDetector` weights at process startup. This completely eliminates the cold-start penalty for the very first caller on a new worker.
+
+## Build Challenges & Technical Obstacles
+
+**1. Race Conditions During Call Startup (Audio Clipping)**
+*   **Issue:** During SIP phone calls, the agent was attempting to greet the user before the user had fully connected to the LiveKit room. Because the agent was speaking into an "empty room," the first few seconds of audio were lost, making the agent seem unresponsive or broken upon answering.
+*   **Solution:** We introduced a synchronization barrier using `await ctx.wait_for_participant()` at the very beginning of the session entrypoint. This pauses the agent’s logic until the caller is fully connected, guaranteeing that the greeting is only played once the audio track is active and ready to receive it. 
+
+**2. High End-to-End Latency & "Cold Start" Penalties**
+*   **Issue:** Voice AI applications are highly sensitive to latency. Initially, our Time-To-First-Token (TTFT) was noticeably sluggish, and the very first call on a newly spun-up server suffered from a massive "cold start" delay while downloading model weights.
+*   **Solution:** We attacked latency across the entire stack by implementing a prewarm function at process startup, enabling preemptive LLM generation before the turn fully ended, and swapping the LLM to a faster model (`gpt-4o-mini`).
+
+**3. Multilingual Transcription Failures (Hindi & Telugu)**
+*   **Issue:** The agent was instructed to speak English, Hindi, and Telugu, but the Sarvam STT plugin was initially hardcoded to `language="en-IN"`. As a result, when a user spoke Hindi or Telugu, the STT would aggressively try to transcribe it into phonetically similar English words, destroying the context for the LLM. 
+*   **Solution:** We reconfigured the Sarvam STT model to use `language="unknown"`. This allows Sarvam's `saaras:v3` model to dynamically auto-detect the spoken language on a per-utterance basis, passing the native Hindi or Telugu text cleanly to the LLM. 
+
+**4. Interruption Handling & False "Backchannels"**
+*   **Issue:** The default "adaptive" interruption model was struggling to differentiate between a user actively interrupting the agent and a user just acknowledging them (backchanneling like "mhmm" or "yeah"). It frequently ignored real interruptions and kept talking over the user.
+*   **Solution:** We switched the `interruption.mode` in the `TurnHandlingOptions` to a strict `"vad"` (Voice Activity Detection) policy. This overrides the smart model and ensures the agent halts its speech instantly the millisecond the user makes a sound, creating a much snappier and more polite conversational dynamic.
